@@ -1,0 +1,78 @@
+<DOCTYPE html>
+<html>
+<head>
+<title>Aerial</title>
+	<meta name="author" content="niew">
+    <style>
+        body {
+            background-color:#D6EAF8;
+            font-family: Avantgarde, sans-serif;
+            color:#1C2833;
+        }
+        div {
+            background-color:#1C2833;
+            display:table-cell;
+            white-space:no-wrap;
+            border:5px solid #1C2833;
+        }
+        canvas {
+            background-color:aliceblue;
+        }
+        h1 {
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1 >Aerial</h1>
+    <table>
+        <tr>
+            <td colspan='2' style='padding:2%'>
+                This was inspired by "<a href="https://www.amazon.com/Turtles-Termites-Traffic-Jams-Explorations/dp/0262680939">Turtles, Termites, and Traffic Jams</a>".<br>
+                <br>
+                Imagine a cartesian grid occupied by many, many turtles, each moving according to the same set of local rules.<br>
+                <br>
+                In this simulation, each turtle also carries a xylophone (or harp!) and plays a note from the C major scale.&nbsp;&nbsp;Depending on what it hears, it tries to play a note that harmonizes with its sonic environment.&nbsp;&nbsp;This in turn, affects the notes other turtles hear.<br>
+                <br>
+                ...Or don't imagine that...I mean...moving colors and stuff.<br>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="canvas-bloc">
+                    <canvas id="aerial" width="600" height="600">
+                        HTML5 isn't supported : (
+                    </canvas>
+                </div>
+                <script src="aerial.js"></script>
+            </td>
+            <td style='padding-left:30px'>
+                <p><h2>Controls</h2></p>
+                <p>
+                    spacebar: pause<br><br>
+                    'c': randomly change the color scheme<br><br>
+                    'i': toggle-view hypothetical turtles<br><br>
+                    'r': randomly reposition hypothetical turtles<br><br>
+                    '1','2', or '3': presets<br>
+                    <ul>
+                        <li>Preset 1:<br> 25 x 25 grid, 20 turtles, xylophone timbre</li><br>
+                        <li>Preset 2:<br> 100 x 100 grid, 10 turtles, xylophone timbre</li><br>
+                        <li>Preset 3:<br> 50 x 50 grid, 15 turtles, harp timbre with a broken 'a' string<br></li>
+                        </ul>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td colspan='2' style='font-size:50%'>
+                <br>
+                <b>Credits:</b><br>
+                Samples were snatched from Freesound: <a href="https://freesound.org/people/Daphne_in_Wonderland/packs/7931/">Daphne_in_Wonderland</a>, <a href="https://freesound.org/people/DANMITCH3LL/packs/14220/">DANMITCH3LL</a><br>
+                As a noob: functions for loading audio buffers were found in <a href="https://www.html5rocks.com/en/tutorials/webaudio/intro/">this</a> tutorial.
+                <br>
+                Excuses for the name: wind chimes and Kate Bush
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

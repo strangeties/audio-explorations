@@ -1,67 +1,7 @@
-// -------------------------------
-// CLASSES BORROWED FROM ELSEWHERE
-// -------------------------------
-// source: https://www.html5rocks.com/en/tutorials/webaudio/intro/js/buffer-loader.js
-function BufferLoader(context, urlList, callback) {
-  this.context = context;
-  this.urlList = urlList;
-  this.onload = callback;
-  this.bufferList = new Array();
-  this.loadCount = 0;
-}
-
-BufferLoader.prototype.loadBuffer = function(url, index) {
-  // Load buffer asynchronously
-  var request = new XMLHttpRequest();
-  request.open("GET", url, true);
-  request.responseType = "arraybuffer";
-
-  var loader = this;
-
-  request.onload = function() {
-    // Asynchronously decode the audio file data in request.response
-    loader.context.decodeAudioData(
-      request.response,
-      function(buffer) {
-        if (!buffer) {
-          alert('error decoding file data: ' + url);
-          return;
-        }
-        loader.bufferList[index] = buffer;
-        if (++loader.loadCount == loader.urlList.length)
-          loader.onload(loader.bufferList);
-      },
-      function(error) {
-        console.error('decodeAudioData error', error);
-      }
-    );
-  }
-
-  request.onerror = function() {
-    alert('BufferLoader: XHR error');
-  }
-
-  request.send();
-}
-
-BufferLoader.prototype.load = function() {
-  for (var i = 0; i < this.urlList.length; ++i)
-  this.loadBuffer(this.urlList[i], i);
-}
-
 // ---------
 // CONSTANTS
 // ---------
 var NOTES = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
-var NOTES_TO_NUMS = {
-    'c': 0,
-    'd': 1,
-    'e': 2,
-    'f': 3,
-    'g': 4,
-    'a': 5,
-    'b': 6
-};
 var NOTES_TO_COLORS = {
     'c': "#FF0033",
     'd': "#DD0066",
@@ -155,9 +95,9 @@ function NewChords() {
     return chords;
 }
 
-// -------
-// METHODS
-// -------
+// ----------------
+// METHODS: Startup
+// ----------------
 function StartSimulation() {
     pause = true;
     InitializeBuffers();
@@ -184,6 +124,9 @@ function ResetElements() {
     }
 }
 
+// --------------
+// METHODS: Audio
+// --------------
 function InitializeBuffers() {
     buffer_loader = new BufferLoader(
     audio_ctx,
@@ -207,12 +150,12 @@ function InitializeBuffers() {
         'audio/harp_hit2.wav',
         'audio/harp_hit3.wav'
     ],
-    FinishedLoadingAudioBuffers
+    InitializeBuffersHelper
     );
     buffer_loader.load();
 }
 
-function FinishedLoadingAudioBuffers(buffer_list) {
+function InitializeBuffersHelper(buffer_list) {
     NOTES_TO_BUFFERS['xylo'] = {};
     NOTES_TO_BUFFERS['harp'] = {};
     for (var i = 0; i < NOTES.length; i++) {
@@ -267,112 +210,16 @@ function UnmuteAudio() {
     }
 }
 
-document.onkeydown = function (event) {
-    if (event.keyCode == 32) {
-        // on spacebar
-        pause = !pause;
-        if (pause) {
-            MuteAudio();
-        } else {
-            UnmuteAudio();
-        }
-    } else if (event.keyCode == 67) {
-        // on' 'c'
-        RandomizeColors();
-        if (pause) {
-            DrawBackground();
-            DrawAll();
-        }
-    } else if (event.keyCode == 82) {
-        // on 'r'
-        RandomizeLocations();
-    } else if (event.keyCode == 73) {
-        // on 'i'
-        show_instruments = !show_instruments;
-        if (pause) {
-            DrawBackground();
-            DrawAll();
-        }
-    } else if (event.keyCode == 49) {
-        // on '1'
-        if (mode != 1) {
-            mode = 1;
-            pause = true;
-            grid_size = 25;
-            width = canvas.width / grid_size;
-            num_instruments = 20;
-            NOTES_TO_COLORS = {
-                'c': "#FF0033",
-                'd': "#DD0066",
-                'e': "#BB0077",
-                'f': "#990099",
-                'g': "#7700BB",
-                'a': "#6600DD",
-                'b': "#3300FF",
-                '': "#000000"
-            }
-            timbre = 'xylo';
-            ResetInstruments();
-            ResetElements();
-            DrawAll();
-            pause = false;
-        }
-    } else if (event.keyCode == 50) {
-        if (mode != 2) {
-            mode = 2;
-            pause = true;
-            grid_size = 100;
-            width = canvas.width / grid_size;
-            num_instruments = 10;
-            NOTES_TO_COLORS = {
-                'c': "#77a9f9",
-                'd': "#356bc4",
-                'e': "#751482",
-                'f': "#e8e1a4",
-                'g': "#b7777f",
-                'a': "#dffc3a",
-                'b': "#cedde2",
-                '': "#000000"
-            }
-            timbre = 'xylo';
-            ResetInstruments();
-            ResetElements();
-            DrawAll();
-            pause = false;
-        } 
-    } else if (event.keyCode == 51) {
-        if (mode != 3) {
-            mode = 3;
-            pause = true;
-            grid_size = 50;
-            width = canvas.width / grid_size;
-            num_instruments = 15;
-            NOTES_TO_COLORS = {
-                'c': "#d15a2b",
-                'd': "#593426",
-                'e': "#fcef35",
-                'f': "#40f9c5",
-                'g': "#7c1635",
-                'a': "#3a0a2e",
-                'b': "#ff0f13",
-                '': "#000000"
-            }
-            timbre = 'harp';
-            ResetInstruments();
-            ResetElements();
-            DrawAll();
-            pause = false;
-        }
-    }
-}
-
+// ----------------------
+// METHODS: Randomization
+// ----------------------
 function RandomizeColors() {
     for (var i = 0; i < NOTES.length; i++) {
-        NOTES_TO_COLORS[NOTES[i]] = RandomColor();
+        NOTES_TO_COLORS[NOTES[i]] = GetRandomColor();
     }
 }
 
-function RandomColor() {
+function GetRandomColor() {
     var color = "#"
     for (var i = 0; i < 3; i++) {
         var tmp = "00" + Math.floor(Math.random() * 256).toString(16);
@@ -388,59 +235,39 @@ function RandomizeLocations() {
     }
 }
 
-function DrawAll() {
-    for (var i = 0; i < grid_size; i++) {
-        for (var j = 0; j < grid_size; j++) {
-            DrawGridElement(grid[i][j]);
-        }
-    }
-    if (show_instruments) {
-        for (var i = 0; i < num_instruments; i++) {
-            DrawInstrument(instruments[i]);
-        }
-    }
+function RandomNoteFromChord(chord) {
+    var to_sum = 2 * Math.floor((Math.random() * 3));
+    var note_ind = (to_sum + NOTES.indexOf(chord)) % NOTES.length;
+    var note = NOTES[note_ind];
+    return note;
 }
 
-function DrawBackground() {
-    ctx.beginPath();
-    ctx.rect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#000000";
-    ctx.fill();
+// -----------------
+// METHODS: Updating
+// -----------------
+function IsValidPos(x, y) {
+    return x >= 0 && y >= 0 && x < grid_size && y < grid_size;
 }
 
-function DrawGridElement(element) {
-    ctx.beginPath();
-    ctx.rect(element.x, element.y, width - grid_margin, width - grid_margin);
-    var max_note;
-    var max_weight = 0;
-    var switch_count = 0;
+function WeightForNote(element, note) {
+    var base_note_pos = NOTES.indexOf(note);
+    var base_note = NOTES[base_note_pos];
+    var third_note = NOTES[((base_note_pos) + 2) % NOTES.length];
+    var fifth_note = NOTES[((base_note_pos) + 4) % NOTES.length];
+    var sixth_note = NOTES[((base_note_pos) - 2) % NOTES.length];
+    var fourth_note = NOTES[((base_note_pos) - 4) % NOTES.length];
+    var weight = element[base_note] + 0.5 * element[third_note] + 0.8 * element[fourth_note] + 0.8 * element[fifth_note] + 0.5 * element[sixth_note];
+    return weight;
+}
+
+function PanValue(x) {
+    return -1 + 2 * (x + .5) / grid_size;
+}
+
+function FadeGridElement(element) {
     for (var i = 0; i < NOTES.length; i++) {
-        if (element[NOTES[i]] > max_weight) {
-            max_note = NOTES[i];
-            max_weight = element[NOTES[i]];
-            switch_count = 0;
-        } else if (element[NOTES[i]] == max_weight) {
-            switch_count++;
-            if (Math.random() < 1 / switch_count) {
-                max_note = NOTES[i];
-                max_weight = element[NOTES[i]];
-            }
-        }
+        element[NOTES[i]] *= 1.1;
     }
-    if (max_weight == 0) {
-        max_note = "";
-    }
-    ctx.fillStyle = NOTES_TO_COLORS[max_note];
-    ctx.fill();
-}
-
-function DrawInstrument(instrument) {
-    font_size = (width - 2 * grid_margin);
-    ctx.beginPath()
-    ctx.font = font_size + "px Arial";
-    ctx.fillStyle = '#FFFFFF';
-    ctx.textAlign = "center";
-    ctx.fillText(instrument.note, width * instrument.y + width / 2, width * instrument.x + width / 2 + width / 4 + width / 16);
 }
 
 function Update() {
@@ -559,12 +386,6 @@ function UpdateGrid() {
     grid = new_grid;
 }
 
-function FadeGridElement(element) {
-    for (var i = 0; i < NOTES.length; i++) {
-        element[NOTES[i]] *= 1.1;
-    }
-}
-
 function UpdateGridElement(element, i, j) {
     UpdateGridElementNotes(element, i + 1, j, K_ADJACENT);
     UpdateGridElementNotes(element, i - 1, j, K_ADJACENT);
@@ -584,29 +405,180 @@ function UpdateGridElementNotes(element, x, y, k) {
     }
 }
 
-function IsValidPos(x, y) {
-    return x >= 0 && y >= 0 && x < grid_size && y < grid_size;
+// ----------------
+// METHODS: Drawing
+// ----------------
+function DrawAll() {
+    for (var i = 0; i < grid_size; i++) {
+        grid[i].forEach(DrawGridElement);
+    }
+    if (show_instruments) {
+        instruments.forEach(DrawInstrument);
+    }
 }
 
-function RandomNoteFromChord(chord) {
-    var to_sum = 2 * Math.floor((Math.random() * 3));
-    var note_ind = (to_sum + NOTES_TO_NUMS[chord]) % NOTES.length;
-    var note = NOTES[note_ind];
-    return note;
+function DrawBackground() {
+    ctx.beginPath();
+    ctx.rect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#000000";
+    ctx.fill();
 }
 
-function WeightForNote(element, note) {
-    var base_note_pos = NOTES_TO_NUMS[note];
-    var base_note = NOTES[base_note_pos];
-    var third_note = NOTES[((base_note_pos) + 2) % NOTES.length];
-    var fifth_note = NOTES[((base_note_pos) + 4) % NOTES.length];
-    var sixth_note = NOTES[((base_note_pos) - 2) % NOTES.length];
-    var fourth_note = NOTES[((base_note_pos) - 4) % NOTES.length];
-    var weight = element[base_note] + 0.5 * element[third_note] + 0.8 * element[fourth_note] + 0.8 * element[fifth_note] + 0.5 * element[sixth_note];
-    return weight;
+function DrawGridElement(element, index, arr) {
+    ctx.beginPath();
+    ctx.rect(element.x, element.y, width - grid_margin, width - grid_margin);
+    var max_note;
+    var max_weight = 0;
+    var switch_count = 0;
+    for (var i = 0; i < NOTES.length; i++) {
+        if (element[NOTES[i]] > max_weight) {
+            max_note = NOTES[i];
+            max_weight = element[NOTES[i]];
+            switch_count = 0;
+        } else if (element[NOTES[i]] == max_weight) {
+            switch_count++;
+            if (Math.random() < 1 / switch_count) {
+                max_note = NOTES[i];
+                max_weight = element[NOTES[i]];
+            }
+        }
+    }
+    if (max_weight == 0) {
+        max_note = "";
+    }
+    ctx.fillStyle = NOTES_TO_COLORS[max_note];
+    ctx.fill();
 }
 
-function PanValue(x) {
-    return -1 + 2 * (x + .5) / grid_size;
+function DrawInstrument(instrument, index, arr) {
+    font_size = (width - 2 * grid_margin);
+    ctx.beginPath()
+    ctx.font = font_size + "px Arial";
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = "center";
+    ctx.fillText(instrument.note, width * instrument.y + width / 2, width * instrument.x + width / 2 + width / 4 + width / 16);
 }
 
+// --------------------
+// METHODS: Interaction
+// --------------------
+document.onkeydown = function (event) {
+    switch (event.keyCode) {
+        case 32:
+            // on spacebar
+            pause = !pause;
+            if (pause) {
+                MuteAudio();
+            } else {
+                UnmuteAudio();
+            }
+            break;
+        case 67:
+            // on' 'c'
+            RandomizeColors();
+            if (pause) {
+                DrawBackground();
+                DrawAll();
+            }
+            break;
+        case 82:
+            // on 'r'
+            RandomizeLocations();
+            break;
+        case 73:
+            // on 'i'
+            show_instruments = !show_instruments;
+            if (pause) {
+                DrawBackground();
+                DrawAll();
+            }
+            break;
+        case 49:
+            // on '1'
+            if (mode != 1) {
+                SetModeOne;
+            }
+            break;
+        case 50:
+            if (mode != 2) {
+                SetModeTwo;
+            } 
+            break;
+        case 51:
+            if (mode != 3) {
+                SetModeThree;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+function SetModeOne() {
+    mode = 1;
+    pause = true;
+    grid_size = 25;
+    width = canvas.width / grid_size;
+    num_instruments = 20;
+    NOTES_TO_COLORS = {
+        'c': "#FF0033",
+        'd': "#DD0066",
+        'e': "#BB0077",
+        'f': "#990099",
+        'g': "#7700BB",
+        'a': "#6600DD",
+        'b': "#3300FF",
+        '': "#000000"
+    }
+    timbre = 'xylo';
+    ResetInstruments();
+    ResetElements();
+    DrawAll();
+    pause = false;
+}
+
+function SetModeTwo() {
+    mode = 2;
+    pause = true;
+    grid_size = 100;
+    width = canvas.width / grid_size;
+    num_instruments = 10;
+    NOTES_TO_COLORS = {
+        'c': "#77a9f9",
+        'd': "#356bc4",
+        'e': "#751482",
+        'f': "#e8e1a4",
+        'g': "#b7777f",
+        'a': "#dffc3a",
+        'b': "#cedde2",
+        '': "#000000"
+    }
+    timbre = 'xylo';
+    ResetInstruments();
+    ResetElements();
+    DrawAll();
+    pause = false;
+}
+
+function SetModeThree() {
+    mode = 3;
+    pause = true;
+    grid_size = 50;
+    width = canvas.width / grid_size;
+    num_instruments = 15;
+    NOTES_TO_COLORS = {
+        'c': "#d15a2b",
+        'd': "#593426",
+        'e': "#fcef35",
+        'f': "#40f9c5",
+        'g': "#7c1635",
+        'a': "#3a0a2e",
+        'b': "#ff0f13",
+        '': "#000000"
+    }
+    timbre = 'harp';
+    ResetInstruments();
+    ResetElements();
+    DrawAll();
+    pause = false;
+}

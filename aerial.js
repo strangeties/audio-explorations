@@ -11,7 +11,7 @@ var NOTES_TO_COLORS = {
     'a': "#6600DD",
     'b': "#3300FF",
     '': "#000000"
-}
+};
 var NOTES_TO_BUFFERS = {};
 
 var K_ADJACENT = 0.02;
@@ -41,11 +41,6 @@ var last_date;
 
 var pause = false;
 var show_instruments = false;
-
-// ------
-// SCRIPT
-// ------
-StartSimulation();
 
 // -------
 // CLASSES
@@ -148,7 +143,16 @@ function InitializeBuffers() {
         'audio/harp_b.wav',
         'audio/harp_c2.wav',
         'audio/harp_hit2.wav',
-        'audio/harp_hit3.wav'
+        'audio/harp_hit3.wav',
+        'audio/bell_c.mp3',
+        'audio/bell_d.mp3',
+        'audio/bell_e.mp3',
+        'audio/bell_f.mp3',
+        'audio/bell_g.mp3',
+        'audio/bell_a.mp3',
+        'audio/bell_b.mp3',
+        'audio/bell_c.mp3',
+        'audio/bell_a2.mp3'
     ],
     InitializeBuffersHelper
     );
@@ -158,15 +162,18 @@ function InitializeBuffers() {
 function InitializeBuffersHelper(buffer_list) {
     NOTES_TO_BUFFERS['xylo'] = {};
     NOTES_TO_BUFFERS['harp'] = {};
+    NOTES_TO_BUFFERS['bell'] = {};
     for (var i = 0; i < NOTES.length; i++) {
         NOTES_TO_BUFFERS['xylo'][NOTES[i]] = buffer_list[i];
         NOTES_TO_BUFFERS['harp'][NOTES[i]] = buffer_list[i + 8];
+        NOTES_TO_BUFFERS['bell'][NOTES[i]] = buffer_list[i + 18];
     }
-    // add a c2.
+    // add alternatives.
     NOTES_TO_BUFFERS['xylo']['c2'] = buffer_list[7];
     NOTES_TO_BUFFERS['harp']['c2'] = buffer_list[15];
     NOTES_TO_BUFFERS['harp']['a2'] = buffer_list[16];
     NOTES_TO_BUFFERS['harp']['a3'] = buffer_list[17];
+    NOTES_TO_BUFFERS['bell']['a2'] = buffer_list[26]
     for (var i = 0; i < num_instruments; i++) {
         instruments[i].playback.buffer = GetBuffer(instruments[i].note);
         instruments[i].playback.start(0);
@@ -177,7 +184,7 @@ function InitializeBuffersHelper(buffer_list) {
 
 function GetBuffer(note) {
     var buffer;
-    if (note == 'c') {
+    if (note == 'c' && (timbre == 'harp' || timbre == 'xylo')) {
         if (Math.random() < .1) {
             buffer = NOTES_TO_BUFFERS[timbre]['c2'];
         } else {
@@ -191,6 +198,13 @@ function GetBuffer(note) {
             buffer = NOTES_TO_BUFFERS[timbre]['a2'];
         } else {
             buffer = NOTES_TO_BUFFERS[timbre]['a3'];
+        }
+    } else if (note == 'a' && timbre == 'bell') {
+        var rand = Math.ranodm();
+        if (rand < .33) {
+            buffer = NOTES_TO_BUFFERS[timbre]['a2'];
+        } else {
+            buffer = NOTES_TO_BUFFERS[timbre]['a'];
         }
     } else {
         buffer = NOTES_TO_BUFFERS[timbre][note];
@@ -496,17 +510,17 @@ document.onkeydown = function (event) {
         case 49:
             // on '1'
             if (mode != 1) {
-                SetModeOne;
+                SetModeOne();
             }
             break;
         case 50:
             if (mode != 2) {
-                SetModeTwo;
+                SetModeTwo();
             } 
             break;
         case 51:
             if (mode != 3) {
-                SetModeThree;
+                SetModeThree();
             }
             break;
         default:
@@ -553,7 +567,7 @@ function SetModeTwo() {
         'b': "#cedde2",
         '': "#000000"
     }
-    timbre = 'xylo';
+    timbre = 'bell';
     ResetInstruments();
     ResetElements();
     DrawAll();
@@ -582,3 +596,8 @@ function SetModeThree() {
     DrawAll();
     pause = false;
 }
+
+// ------
+// SCRIPT
+// ------
+StartSimulation();

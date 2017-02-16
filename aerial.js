@@ -200,7 +200,7 @@ function GetBuffer(note) {
             buffer = NOTES_TO_BUFFERS[timbre]['a3'];
         }
     } else if (note == 'a' && timbre == 'bell') {
-        var rand = Math.ranodm();
+        var rand = Math.random();
         if (rand < .33) {
             buffer = NOTES_TO_BUFFERS[timbre]['a2'];
         } else {

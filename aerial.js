@@ -220,7 +220,7 @@ function MuteAudio() {
 
 function UnmuteAudio() {
     for (var i = 0; i < num_instruments; i++) {
-        instruments[i].gain.gain.value = 1;
+        instruments[i].gain.gain.value = .1;
     }
 }
 
